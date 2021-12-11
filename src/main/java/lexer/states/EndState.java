@@ -1,5 +1,6 @@
 package lexer.states;
 
+import evaluators.PostfixEvaluator;
 import lexer.Tokenizer;
 import lexer.tokens.Token;
 import lombok.Getter;
@@ -8,11 +9,11 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-public class EndState extends AbstractState {
+public class EndState<NT extends PostfixEvaluator<NT>, T extends Token<NT>> extends AbstractState<NT, T> {
     @Getter
-    private final List<Token> accumulatedTokens;
+    private final List<T> accumulatedTokens;
 
-    public EndState(final @NotNull @NonNull Tokenizer tokenizer, final @NotNull @NonNull List<Token> accumulatedTokens) {
+    public EndState(final @NotNull @NonNull Tokenizer<NT, T> tokenizer, final @NotNull @NonNull List<T> accumulatedTokens) {
         super(tokenizer, accumulatedTokens);
         this.accumulatedTokens = accumulatedTokens;
     }
@@ -23,7 +24,7 @@ public class EndState extends AbstractState {
     }
 
     @Override
-    public @NotNull State handle() {
+    public @NotNull State<NT, T> handle() {
         return this;
     }
 

@@ -12,7 +12,7 @@ import java.util.Map;
 import java.util.Stack;
 import java.util.function.BinaryOperator;
 
-public abstract sealed class NumberToken implements Token permits NumberToken.DoubleToken, NumberToken.LongToken {
+public abstract sealed class NumberToken<NT extends Number> implements Token<NT> permits /* NumberToken.DoubleToken, */ NumberToken.LongToken {
     @Getter(value = AccessLevel.PUBLIC)
     protected final @NotNull Number value;
 
@@ -20,17 +20,13 @@ public abstract sealed class NumberToken implements Token permits NumberToken.Do
         this.value = value;
     }
 
-    public static NumberToken valueOf(final @NotNull @NonNull String stringValue) {
-        return new LongToken(stringValue);
-    }
-
     @Override
-    public void accept(TokenVisitor visitor) {
+    public void accept(TokenVisitor<NT> visitor) {
         throw new UnsupportedOperationException("TODO");
     }
 
-    public static final class LongToken extends NumberToken implements PostfixEvaluator<LongToken> {
-        private static final @NotNull @NonNull Map<Class<? extends Operation>, BinaryOperator<@NotNull @NonNull Long>> binaryOperatorMap = Map.of(
+    public static final class LongToken extends NumberToken<Long> implements PostfixEvaluator<LongToken> {
+        private static final @NotNull @NonNull Map<Class<?>, BinaryOperator<@NotNull @NonNull Long>> binaryOperatorMap = Map.of(
                 Operation.Plus.class, Long::sum,
                 Operation.BinaryMinus.class, (final @NotNull @NonNull Long a, final @NotNull @NonNull Long b) -> a - b,
                 Operation.Multiply.class, (final @NotNull @NonNull Long a, final @NotNull @NonNull Long b) -> a * b,
@@ -50,8 +46,12 @@ public abstract sealed class NumberToken implements Token permits NumberToken.Do
             super(value);
         }
 
+        public static LongToken valueOf(@NotNull @NonNull String stringValue) {
+            return new LongToken(stringValue);
+        }
+
         @Override
-        public void evaluate(final @NotNull @NonNull Operation op, final @NotNull @NonNull Stack<@NotNull @NonNull LongToken> argStack) {
+        public void evaluate(final @NotNull @NonNull Operation<LongToken> op, final @NotNull @NonNull Stack<@NotNull @NonNull LongToken> argStack) {
             final long result;
             if (op instanceof Operation.UnaryMinus) {
                 if (argStack.empty()) {
@@ -78,9 +78,11 @@ public abstract sealed class NumberToken implements Token permits NumberToken.Do
         }
     }
 
-    public static final class DoubleToken extends NumberToken {
+    /*
+    public static final class DoubleToken extends NumberToken<?> {
         public DoubleToken(final @NotNull @NonNull String value) {
             super(Double.parseDouble(value));
         }
     }
+    */
 }

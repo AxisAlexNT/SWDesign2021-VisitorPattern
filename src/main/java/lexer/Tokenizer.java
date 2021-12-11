@@ -1,5 +1,6 @@
 package lexer;
 
+import evaluators.PostfixEvaluator;
 import ex.TokenizerException;
 import lexer.states.ErrorState;
 import lexer.states.StartState;
@@ -15,27 +16,32 @@ import java.io.InputStreamReader;
 import java.io.PushbackReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 
-public class Tokenizer {
+public class Tokenizer<NT extends PostfixEvaluator<NT>> {
     @Getter(value = AccessLevel.PUBLIC)
     private @NotNull
     final PushbackReader inputReader;
-    private @NotNull State state;
+    @Getter(value = AccessLevel.PUBLIC)
+    private @NotNull
+    final Function<String, Token<NT>> tokenConstructor;
+    private @NotNull State<NT, T> state;
 
-    public Tokenizer(final @NotNull @NonNull InputStream inputStream) {
+    public Tokenizer(final @NotNull @NonNull InputStream inputStream, final @NotNull @NonNull Function<String, T> tokenConstructor) {
         inputReader = new PushbackReader(new InputStreamReader(inputStream));
-        final @NotNull List<Token> tokens = new ArrayList<>();
-        this.state = new StartState(this, tokens);
+        this.tokenConstructor = tokenConstructor;
+        final @NotNull List<T> tokens = new ArrayList<>();
+        this.state = new StartState<NT, T>(this, tokens);
     }
 
-    public List<Token> getTokens() {
+    public List<T> getTokens() {
         assert (state instanceof StartState) : "Attempt to call getTokens() not from the start state?";
         while (!state.isTerminalState()) {
             state = state.handle();
         }
 
         if (state instanceof ErrorState) {
-            throw new TokenizerException("Failed to split input stream into the tokens", ((ErrorState) state).getCause());
+            throw new TokenizerException("Failed to split input stream into the tokens", ((ErrorState<NT, T>) state).getCause());
         }
 
         return state.getAccumulatedTokens();
