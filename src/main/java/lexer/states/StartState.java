@@ -16,7 +16,7 @@ import java.util.concurrent.Callable;
 public class StartState extends AbstractState {
     private static final Map<Character, Callable<Operation>> charToOp = Map.of(
             '+', Operation.Plus::new,
-            '-', Operation.Minus::new,
+            '-', Operation.BinaryMinus::new,
             '*', Operation.Multiply::new,
             '/', Operation.Divide::new
     );
@@ -37,8 +37,8 @@ public class StartState extends AbstractState {
 
         // Global try-catch block allows for only-return flow
         try {
-            final int inputCharacter = reader.read();
-            if (inputCharacter == -1) {
+            final char inputCharacter = (char) (reader.ready() ? reader.read() : -1);
+            if (inputCharacter == (char) (-1)) {
                 reader.close();
                 newState = new EndState(tokenizer, accumulatedTokens);
             } else if (Character.isWhitespace(inputCharacter)) {
@@ -46,13 +46,28 @@ public class StartState extends AbstractState {
             } else if (Character.isDigit(inputCharacter)) {
                 reader.unread(inputCharacter);
                 newState = new NumberState(tokenizer, accumulatedTokens);
-            } else if (charToOp.containsKey((char) inputCharacter)) {
+            } else if (inputCharacter == '-') {
+                // Process unary/binary minus case:
                 final @NotNull @NonNull Token opToken;
-                opToken = charToOp.get((char) inputCharacter).call();
+                if (accumulatedTokens.isEmpty()) {
+                    opToken = new Operation.UnaryMinus();
+                } else {
+                    final @NotNull @NonNull Token previousToken = accumulatedTokens.get(accumulatedTokens.size() - 1);
+                    if ((previousToken instanceof Brace.LeftBrace) || (previousToken instanceof Operation)) {
+                        opToken = new Operation.UnaryMinus();
+                    } else {
+                        opToken = new Operation.BinaryMinus();
+                    }
+                }
                 accumulatedTokens.add(opToken);
                 newState = this;
-            } else if (Brace.isBraceCharacter((char) inputCharacter)) {
-                accumulatedTokens.add(Brace.getBraceByCharacter((char) inputCharacter));
+            } else if (charToOp.containsKey(inputCharacter)) {
+                final @NotNull @NonNull Token opToken;
+                opToken = charToOp.get(inputCharacter).call();
+                accumulatedTokens.add(opToken);
+                newState = this;
+            } else if (Brace.isBraceCharacter(inputCharacter)) {
+                accumulatedTokens.add(Brace.getBraceByCharacter(inputCharacter));
                 newState = this;
             } else {
                 throw new WrongTokenException("Unexpected character in input: " + inputCharacter);

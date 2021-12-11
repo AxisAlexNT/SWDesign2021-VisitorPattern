@@ -1,6 +1,6 @@
 package ex;
 
-public class WrongTokenException extends IncorrectInputException {
+public class WrongTokenException extends TokenizerException {
     public WrongTokenException() {
     }
 

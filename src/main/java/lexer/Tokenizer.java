@@ -1,5 +1,7 @@
 package lexer;
 
+import ex.TokenizerException;
+import lexer.states.ErrorState;
 import lexer.states.StartState;
 import lexer.states.State;
 import lexer.tokens.Token;
@@ -15,10 +17,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Tokenizer {
-    private @NotNull State state;
     @Getter(value = AccessLevel.PUBLIC)
     private @NotNull
     final PushbackReader inputReader;
+    private @NotNull State state;
 
     public Tokenizer(final @NotNull @NonNull InputStream inputStream) {
         inputReader = new PushbackReader(new InputStreamReader(inputStream));
@@ -31,6 +33,11 @@ public class Tokenizer {
         while (!state.isTerminalState()) {
             state = state.handle();
         }
+
+        if (state instanceof ErrorState) {
+            throw new TokenizerException("Failed to split input stream into the tokens", ((ErrorState) state).getCause());
+        }
+
         return state.getAccumulatedTokens();
     }
 }

@@ -5,11 +5,11 @@ import visitors.TokenVisitor;
 
 public abstract sealed class Brace implements Token permits Brace.LeftBrace, Brace.RightBrace {
 
-    public static boolean isBraceCharacter(final char ch){
+    public static boolean isBraceCharacter(final char ch) {
         return (ch == '(') || (ch == ')');
     }
 
-    public static Brace getBraceByCharacter(final char ch) throws WrongTokenException{
+    public static Brace getBraceByCharacter(final char ch) throws WrongTokenException {
         assert isBraceCharacter(ch) : "Non-brace character supplied to the getBraceByCharacter";
         return switch (ch) {
             case '(' -> new LeftBrace();
@@ -18,17 +18,14 @@ public abstract sealed class Brace implements Token permits Brace.LeftBrace, Bra
         };
     }
 
+    @Override
+    public void accept(TokenVisitor visitor) {
+        visitor.visit(this);
+    }
+
     public static final class LeftBrace extends Brace {
-        @Override
-        public void accept(TokenVisitor visitor) {
-            throw new UnsupportedOperationException("TODO");
-        }
     }
 
     public static final class RightBrace extends Brace {
-        @Override
-        public void accept(TokenVisitor visitor) {
-            throw new UnsupportedOperationException("TODO");
-        }
     }
 }
