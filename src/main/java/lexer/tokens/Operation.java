@@ -1,14 +1,13 @@
 package lexer.tokens;
 
-import evaluators.PostfixEvaluator;
 import lombok.NonNull;
 import org.jetbrains.annotations.NotNull;
 import visitors.TokenVisitor;
 
 import java.util.Comparator;
 
-public abstract sealed class Operation<NT extends PostfixEvaluator<NT>> implements Token<NT> permits Operation.BinaryMinus, Operation.Divide, Operation.Multiply, Operation.Plus, Operation.UnaryMinus {
-    public final Comparator<Operation<NT>> BY_PRIORITY_COMPARATOR = Comparator.comparingInt(Operation::getPriority);
+public abstract sealed class Operation implements Token permits Operation.BinaryMinus, Operation.Divide, Operation.Multiply, Operation.Plus, Operation.UnaryMinus {
+    public static final Comparator<Operation> BY_PRIORITY_COMPARATOR = Comparator.comparingInt(Operation::getPriority);
 
     public abstract int getPriority();
 
@@ -16,10 +15,10 @@ public abstract sealed class Operation<NT extends PostfixEvaluator<NT>> implemen
 
     public abstract boolean isLeftAssociative();
 
-    public static final class Plus<NT extends PostfixEvaluator<NT>> extends Operation<NT> {
+    public static final class Plus extends Operation {
         @Override
-        public void accept(final @NotNull @NonNull TokenVisitor<NT> visitor) {
-            visitor.visit(this);
+        public void accept(final @NotNull @NonNull TokenVisitor visitor) {
+            throw new UnsupportedOperationException("TODO");
         }
 
         @Override
@@ -38,10 +37,10 @@ public abstract sealed class Operation<NT extends PostfixEvaluator<NT>> implemen
         }
     }
 
-    public static final class Multiply<NT extends PostfixEvaluator<NT>> extends Operation<NT> {
+    public static final class Multiply extends Operation {
         @Override
-        public void accept(final @NotNull @NonNull TokenVisitor<NT> visitor) {
-            visitor.visit(this);
+        public void accept(final @NotNull @NonNull TokenVisitor visitor) {
+            throw new UnsupportedOperationException("TODO");
         }
 
         @Override
@@ -60,10 +59,10 @@ public abstract sealed class Operation<NT extends PostfixEvaluator<NT>> implemen
         }
     }
 
-    public static final class BinaryMinus<NT extends PostfixEvaluator<NT>> extends Operation<NT> {
+    public static final class BinaryMinus extends Operation {
         @Override
-        public void accept(final @NotNull @NonNull TokenVisitor<NT> visitor) {
-            visitor.visit(this);
+        public void accept(final @NotNull @NonNull TokenVisitor visitor) {
+            throw new UnsupportedOperationException("TODO");
         }
 
         @Override
@@ -82,10 +81,10 @@ public abstract sealed class Operation<NT extends PostfixEvaluator<NT>> implemen
         }
     }
 
-    public static final class UnaryMinus<NT extends PostfixEvaluator<NT>> extends Operation<NT> {
+    public static final class UnaryMinus extends Operation {
         @Override
-        public void accept(final @NotNull @NonNull TokenVisitor<NT> visitor) {
-            visitor.visit(this);
+        public void accept(final @NotNull @NonNull TokenVisitor visitor) {
+            throw new UnsupportedOperationException("TODO");
         }
 
         @Override
@@ -104,10 +103,10 @@ public abstract sealed class Operation<NT extends PostfixEvaluator<NT>> implemen
         }
     }
 
-    public static final class Divide<NT extends PostfixEvaluator<NT>> extends Operation<NT> {
+    public static final class Divide extends Operation {
         @Override
-        public void accept(final @NotNull @NonNull TokenVisitor<NT> visitor) {
-            visitor.visit(this);
+        public void accept(final @NotNull @NonNull TokenVisitor visitor) {
+            throw new UnsupportedOperationException("TODO");
         }
 
         @Override

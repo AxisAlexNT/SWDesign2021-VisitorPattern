@@ -1,6 +1,5 @@
 package lexer.states;
 
-import evaluators.PostfixEvaluator;
 import ex.WrongTokenException;
 import lexer.Tokenizer;
 import lexer.tokens.Brace;
@@ -14,15 +13,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
-public class StartState<NT extends PostfixEvaluator<NT>, T extends Token<NT>> extends AbstractState<NT, T> {
-    private final Map<Character, Callable<Operation<NT>>> charToOp = Map.of(
+public class StartState extends AbstractState {
+    private static final Map<Character, Callable<Operation>> charToOp = Map.of(
             '+', Operation.Plus::new,
             '-', Operation.BinaryMinus::new,
             '*', Operation.Multiply::new,
             '/', Operation.Divide::new
     );
 
-    public StartState(final @NotNull @NonNull Tokenizer<NT, T> tokenizer, final @NotNull @NonNull List<T> accumulatedTokens) {
+    public StartState(final @NotNull @NonNull Tokenizer tokenizer, final @NotNull @NonNull List<Token> accumulatedTokens) {
         super(tokenizer, accumulatedTokens);
     }
 
@@ -32,38 +31,38 @@ public class StartState<NT extends PostfixEvaluator<NT>, T extends Token<NT>> ex
     }
 
     @Override
-    public @NotNull State<NT, T> handle() {
+    public @NotNull State handle() {
         final @NotNull @NonNull PushbackReader reader = tokenizer.getInputReader();
-        final @NotNull State<NT, T> newState;
+        final @NotNull State newState;
 
         // Global try-catch block allows for only-return flow
         try {
             final char inputCharacter = (char) (reader.ready() ? reader.read() : -1);
             if (inputCharacter == (char) (-1)) {
                 reader.close();
-                newState = new EndState<NT, T>(tokenizer, accumulatedTokens);
+                newState = new EndState(tokenizer, accumulatedTokens);
             } else if (Character.isWhitespace(inputCharacter)) {
                 newState = this;
             } else if (Character.isDigit(inputCharacter)) {
                 reader.unread(inputCharacter);
-                newState = new NumberState<NT, T>(tokenizer, accumulatedTokens);
+                newState = new NumberState(tokenizer, accumulatedTokens);
             } else if (inputCharacter == '-') {
                 // Process unary/binary minus case:
-                final @NotNull @NonNull Token<NT> opToken;
+                final @NotNull @NonNull Token opToken;
                 if (accumulatedTokens.isEmpty()) {
-                    opToken = new Operation.UnaryMinus<NT>();
+                    opToken = new Operation.UnaryMinus();
                 } else {
-                    final @NotNull @NonNull Token<NT> previousToken = accumulatedTokens.get(accumulatedTokens.size() - 1);
-                    if ((previousToken instanceof Brace.LeftBrace<NT>) || (previousToken instanceof Operation<NT>)) {
-                        opToken = new Operation.UnaryMinus<>();
+                    final @NotNull @NonNull Token previousToken = accumulatedTokens.get(accumulatedTokens.size() - 1);
+                    if ((previousToken instanceof Brace.LeftBrace) || (previousToken instanceof Operation)) {
+                        opToken = new Operation.UnaryMinus();
                     } else {
-                        opToken = new Operation.BinaryMinus<>();
+                        opToken = new Operation.BinaryMinus();
                     }
                 }
                 accumulatedTokens.add(opToken);
                 newState = this;
             } else if (charToOp.containsKey(inputCharacter)) {
-                final @NotNull @NonNull Token<T> opToken;
+                final @NotNull @NonNull Token opToken;
                 opToken = charToOp.get(inputCharacter).call();
                 accumulatedTokens.add(opToken);
                 newState = this;
@@ -74,7 +73,7 @@ public class StartState<NT extends PostfixEvaluator<NT>, T extends Token<NT>> ex
                 throw new WrongTokenException("Unexpected character in input: " + inputCharacter);
             }
         } catch (final Exception error) {
-            return new ErrorState<>(tokenizer, accumulatedTokens, error);
+            return new ErrorState(tokenizer, accumulatedTokens, error);
         }
 
         return newState;

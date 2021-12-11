@@ -1,6 +1,5 @@
 package visitors;
 
-import evaluators.PostfixEvaluator;
 import ex.CalculationException;
 import lexer.tokens.Brace;
 import lexer.tokens.NumberToken;
@@ -10,16 +9,11 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Stack;
 
-public class CalcVisitor<NT extends NumberToken & PostfixEvaluator<NT>> implements TokenVisitor<NT> {
-    private final @NonNull PostfixEvaluator<NT> evaluator;
-    private final @NotNull Stack<NT> calcStack = new Stack<>();
-
-    public CalcVisitor(final @NotNull @NonNull PostfixEvaluator<NT> evaluator) {
-        this.evaluator = evaluator;
-    }
+public class CalcVisitor implements TokenVisitor {
+    private final @NotNull Stack<NumberToken> calcStack = new Stack<>();
 
     @Override
-    public void visit(final @NotNull NT token) {
+    public void visit(final @NotNull NumberToken token) {
         calcStack.push(token);
     }
 
@@ -31,6 +25,16 @@ public class CalcVisitor<NT extends NumberToken & PostfixEvaluator<NT>> implemen
 
     @Override
     public void visit(final @NotNull Operation token) {
-        evaluator.evaluate(token, calcStack);
+        NumberToken.getEVALUATOR().evaluate(token, calcStack);
+    }
+
+    public @NotNull @NonNull NumberToken getResult() {
+        if (calcStack.empty()) {
+            throw new CalculationException("Stack underflow: no result was calculated");
+        } else if (calcStack.size() > 1) {
+            throw new CalculationException("Stack overflow: more than one value is present on the stack");
+        } else {
+            return calcStack.peek();
+        }
     }
 }

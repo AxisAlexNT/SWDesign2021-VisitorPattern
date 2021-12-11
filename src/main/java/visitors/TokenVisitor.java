@@ -1,6 +1,5 @@
 package visitors;
 
-import evaluators.PostfixEvaluator;
 import lexer.tokens.Brace;
 import lexer.tokens.NumberToken;
 import lexer.tokens.Operation;
@@ -8,21 +7,20 @@ import lexer.tokens.Token;
 import lombok.NonNull;
 import org.jetbrains.annotations.NotNull;
 
-public interface TokenVisitor<NT extends PostfixEvaluator<NT>> {
-    void visit(final @NotNull @NonNull NumberToken<NT> token);
+public interface TokenVisitor {
+    void visit(final @NotNull @NonNull NumberToken token);
 
-    void visit(final @NotNull @NonNull Brace<NT> token);
+    void visit(final @NotNull @NonNull Brace token);
 
-    void visit(final @NotNull @NonNull Operation<NT> token);
+    void visit(final @NotNull @NonNull Operation token);
 
-
-    default void visit(final @NotNull @NonNull Token<NT> token, final @NotNull @NonNull PostfixEvaluator<NT> evaluator) {
+    default void visit(final @NotNull @NonNull Token token) {
         if (token instanceof NumberToken) {
-            visit((NumberToken<NT>) token);
+            visit((NumberToken) token);
         } else if (token instanceof Brace) {
-            visit((Brace<NT>) token);
+            visit((Brace) token);
         } else if (token instanceof Operation) {
-            visit((Operation<NT>) token);
+            visit((Operation) token);
         }
     }
 }

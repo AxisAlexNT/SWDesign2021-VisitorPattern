@@ -1,7 +1,7 @@
 package lexer.states;
 
-import evaluators.PostfixEvaluator;
 import lexer.Tokenizer;
+import lexer.tokens.NumberToken;
 import lexer.tokens.Token;
 import lombok.NonNull;
 import org.jetbrains.annotations.NotNull;
@@ -11,18 +11,19 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 
-public class NumberState<NT extends PostfixEvaluator<NT>, T extends Token<NT>> extends AbstractState<NT, T> {
+public class NumberState extends AbstractState {
     private final @NotNull Queue<Character> digitsAccumulator;
 
-    public NumberState(final @NotNull @NonNull Tokenizer<NT, T> tokenizer, final @NotNull @NonNull List<T> accumulatedTokens) {
+
+    public NumberState(final @NotNull @NonNull Tokenizer tokenizer, final @NotNull @NonNull List<Token> accumulatedTokens) {
         super(tokenizer, accumulatedTokens);
         this.digitsAccumulator = new LinkedList<>();
     }
 
     @Override
-    public @NotNull State<NT, T> handle() {
+    public @NotNull State handle() {
         final @NotNull @NonNull PushbackReader reader = tokenizer.getInputReader();
-        final @NotNull State<NT, T> newState;
+        final @NotNull State newState;
 
         final int inputChar;
 
@@ -38,12 +39,12 @@ public class NumberState<NT extends PostfixEvaluator<NT>, T extends Token<NT>> e
                 if (!digitsAccumulator.isEmpty()) {
                     final @NotNull StringBuilder numberBuilder = new StringBuilder();
                     digitsAccumulator.forEach(numberBuilder::append);
-                    accumulatedTokens.add(tokenizer.getTokenConstructor().apply(numberBuilder.toString()));
+                    accumulatedTokens.add(NumberToken.valueOf(numberBuilder.toString()));
                 }
-                newState = new StartState<NT, T>(tokenizer, accumulatedTokens);
+                newState = new StartState(tokenizer, accumulatedTokens);
             }
         } catch (final Exception e) {
-            return new ErrorState<>(tokenizer, accumulatedTokens, e);
+            return new ErrorState(tokenizer, accumulatedTokens, e);
         }
 
         return newState;
