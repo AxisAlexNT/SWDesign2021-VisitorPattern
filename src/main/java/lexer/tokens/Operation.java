@@ -6,7 +6,7 @@ import visitors.TokenVisitor;
 
 import java.util.Comparator;
 
-public abstract sealed class Operation implements Token permits Operation.BinaryMinus, Operation.Divide, Operation.Multiply, Operation.Plus, Operation.UnaryMinus {
+public abstract sealed class Operation implements Token<NumberToken.LongToken> permits Operation.BinaryMinus, Operation.Divide, Operation.Multiply, Operation.Plus, Operation.UnaryMinus {
     public static final Comparator<Operation> BY_PRIORITY_COMPARATOR = Comparator.comparingInt(Operation::getPriority);
 
     public abstract int getPriority();

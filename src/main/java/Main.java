@@ -1,4 +1,5 @@
 import lexer.Tokenizer;
+import lexer.tokens.NumberToken;
 import lexer.tokens.Token;
 import org.jetbrains.annotations.NotNull;
 import visitors.ParserVisitor;
@@ -16,7 +17,7 @@ public class Main {
         }
         final @NotNull Tokenizer tokenizer = new Tokenizer(new ByteArrayInputStream(expressionString.getBytes(StandardCharsets.UTF_8)));
         final List<Token> sourceTokens = tokenizer.getTokens();
-        final ParserVisitor parserVisitor = new ParserVisitor();
+        final ParserVisitor<NumberToken.LongToken> parserVisitor = new ParserVisitor<>();
         sourceTokens.forEach(parserVisitor::visit);
         final List<Token> postfixTokens = parserVisitor.getOutputExpression();
     }

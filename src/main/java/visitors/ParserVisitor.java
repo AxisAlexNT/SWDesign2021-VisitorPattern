@@ -1,5 +1,6 @@
 package visitors;
 
+import evaluators.PostfixEvaluator;
 import ex.ParserException;
 import lexer.tokens.Brace;
 import lexer.tokens.NumberToken;
@@ -11,7 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 
-public class ParserVisitor implements TokenVisitor {
+public class ParserVisitor<NT extends NumberToken & PostfixEvaluator<NT>> implements TokenVisitor<NT> {
     private final Stack<Token> processingStack = new Stack<>();
 
     private final List<Token> outputExpression = new ArrayList<>();
