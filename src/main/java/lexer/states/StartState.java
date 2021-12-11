@@ -1,6 +1,5 @@
 package lexer.states;
 
-import ex.ApplicationRuntimeException;
 import ex.WrongTokenException;
 import lexer.Tokenizer;
 import lexer.tokens.Brace;
@@ -9,8 +8,7 @@ import lexer.tokens.Token;
 import lombok.NonNull;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.PushbackReader;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -28,50 +26,39 @@ public class StartState extends AbstractState {
     }
 
     @Override
+    public boolean isTerminalState() {
+        return false;
+    }
+
+    @Override
     public @NotNull State handle() {
-        final @NotNull @NonNull InputStreamReader reader = tokenizer.getInputReader();
+        final @NotNull @NonNull PushbackReader reader = tokenizer.getInputReader();
         final @NotNull State newState;
 
-        final int inputChar;
-
+        // Global try-catch block allows for only-return flow
         try {
-            inputChar = reader.read();
-            if (inputChar == -1) {
+            final int inputCharacter = reader.read();
+            if (inputCharacter == -1) {
                 reader.close();
-            }
-        } catch (final Exception e) {
-            newState = new ErrorState(tokenizer, accumulatedTokens, e);
-            return newState;
-        }
-
-
-        if (inputChar == -1) {
-            newState = new EndState(tokenizer, accumulatedTokens);
-        } else {
-            char ch = (char) inputChar;
-            if (Character.isWhitespace(ch)) {
+                newState = new EndState(tokenizer, accumulatedTokens);
+            } else if (Character.isWhitespace(inputCharacter)) {
                 newState = this;
-            } else if (Character.isDigit(ch)) {
-                newState = new NumberState(tokenizer, accumulatedTokens, ch);
-            } else if (charToOp.containsKey(ch)) {
+            } else if (Character.isDigit(inputCharacter)) {
+                reader.unread(inputCharacter);
+                newState = new NumberState(tokenizer, accumulatedTokens);
+            } else if (charToOp.containsKey((char) inputCharacter)) {
                 final @NotNull @NonNull Token opToken;
-                try {
-                    opToken = charToOp.get(ch).call();
-                } catch (final Exception e) {
-                    assert false : "Constructor of Operation must not throw an exception";
-                    final Throwable error = new ApplicationRuntimeException("Constructor of Operation must not throw an exception", e);
-                    newState = new ErrorState(tokenizer, accumulatedTokens, error);
-                    return newState;
-                }
+                opToken = charToOp.get((char) inputCharacter).call();
                 accumulatedTokens.add(opToken);
                 newState = this;
-            } else if (Brace.isBraceCharacter(ch)) {
-                accumulatedTokens.add(Brace.getBraceByCharacter(ch));
+            } else if (Brace.isBraceCharacter((char) inputCharacter)) {
+                accumulatedTokens.add(Brace.getBraceByCharacter((char) inputCharacter));
                 newState = this;
             } else {
-                final Throwable error = new WrongTokenException("Unexpected character in input: " + ch);
-                newState = new ErrorState(tokenizer, accumulatedTokens, error);
+                throw new WrongTokenException("Unexpected character in input: " + inputCharacter);
             }
+        } catch (final Exception error) {
+            return new ErrorState(tokenizer, accumulatedTokens, error);
         }
 
         return newState;

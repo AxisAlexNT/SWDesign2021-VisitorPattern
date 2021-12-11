@@ -10,4 +10,6 @@ public interface State {
     @NotNull State handle() throws WrongTokenException;
 
     @NotNull List<Token> getAccumulatedTokens();
+
+    boolean isTerminalState();
 }

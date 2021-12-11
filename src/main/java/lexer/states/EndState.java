@@ -18,8 +18,13 @@ public class EndState extends AbstractState {
     }
 
     @Override
+    public boolean isTerminalState() {
+        return true;
+    }
+
+    @Override
     public @NotNull State handle() {
-        throw new UnsupportedOperationException("TODO");
+        return this;
     }
 
 }

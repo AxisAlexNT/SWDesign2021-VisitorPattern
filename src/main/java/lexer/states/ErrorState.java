@@ -19,7 +19,12 @@ public class ErrorState extends AbstractState {
 
     @Override
     public @NotNull State handle() {
-        throw new UnsupportedOperationException("TODO");
+        return this;
+    }
+
+    @Override
+    public boolean isTerminalState() {
+        return true;
     }
 
 }
