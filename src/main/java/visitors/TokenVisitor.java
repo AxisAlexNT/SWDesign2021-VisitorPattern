@@ -7,20 +7,20 @@ import lexer.tokens.Token;
 import lombok.NonNull;
 import org.jetbrains.annotations.NotNull;
 
-public interface TokenVisitor {
-    void visit(final @NotNull @NonNull NumberToken token);
+public interface TokenVisitor<N extends Number> {
+    void visit(final @NotNull @NonNull NumberToken<N> token);
 
-    void visit(final @NotNull @NonNull Brace token);
+    void visit(final @NotNull @NonNull Brace<N> token);
 
-    void visit(final @NotNull @NonNull Operation token);
+    void visit(final @NotNull @NonNull Operation<N> token);
 
-    default void visit(final @NotNull @NonNull Token token) {
+    default void visit(final @NotNull @NonNull Token<N> token) {
         if (token instanceof NumberToken) {
-            visit((NumberToken) token);
+            visit((NumberToken<N>) token);
         } else if (token instanceof Brace) {
-            visit((Brace) token);
+            visit((Brace<N>) token);
         } else if (token instanceof Operation) {
-            visit((Operation) token);
+            visit((Operation<N>) token);
         }
     }
 }

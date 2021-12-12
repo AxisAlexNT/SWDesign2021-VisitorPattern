@@ -6,8 +6,8 @@ import visitors.TokenVisitor;
 
 import java.util.Comparator;
 
-public abstract sealed class Operation implements Token permits Operation.BinaryMinus, Operation.Divide, Operation.Multiply, Operation.Plus, Operation.UnaryMinus {
-    public static final Comparator<Operation> BY_PRIORITY_COMPARATOR = Comparator.comparingInt(Operation::getPriority);
+public abstract sealed class Operation<N extends Number> implements Token<N> permits Operation.BinaryMinus, Operation.Divide, Operation.Multiply, Operation.Plus, Operation.UnaryMinus {
+    public static final Comparator<Operation<?>> BY_PRIORITY_COMPARATOR = Comparator.comparingInt(Operation::getPriority);
 
     public abstract int getPriority();
 
@@ -15,7 +15,7 @@ public abstract sealed class Operation implements Token permits Operation.Binary
 
     public abstract boolean isLeftAssociative();
 
-    public static final class Plus extends Operation {
+    public static final class Plus<N extends Number> extends Operation<N> {
         @Override
         public void accept(final @NotNull @NonNull TokenVisitor visitor) {
             throw new UnsupportedOperationException("TODO");
@@ -37,7 +37,7 @@ public abstract sealed class Operation implements Token permits Operation.Binary
         }
     }
 
-    public static final class Multiply extends Operation {
+    public static final class Multiply<N extends Number> extends Operation<N> {
         @Override
         public void accept(final @NotNull @NonNull TokenVisitor visitor) {
             throw new UnsupportedOperationException("TODO");
@@ -59,7 +59,7 @@ public abstract sealed class Operation implements Token permits Operation.Binary
         }
     }
 
-    public static final class BinaryMinus extends Operation {
+    public static final class BinaryMinus<N extends Number> extends Operation<N> {
         @Override
         public void accept(final @NotNull @NonNull TokenVisitor visitor) {
             throw new UnsupportedOperationException("TODO");
@@ -81,7 +81,7 @@ public abstract sealed class Operation implements Token permits Operation.Binary
         }
     }
 
-    public static final class UnaryMinus extends Operation {
+    public static final class UnaryMinus<N extends Number> extends Operation<N> {
         @Override
         public void accept(final @NotNull @NonNull TokenVisitor visitor) {
             throw new UnsupportedOperationException("TODO");
@@ -103,7 +103,7 @@ public abstract sealed class Operation implements Token permits Operation.Binary
         }
     }
 
-    public static final class Divide extends Operation {
+    public static final class Divide<N extends Number> extends Operation<N> {
         @Override
         public void accept(final @NotNull @NonNull TokenVisitor visitor) {
             throw new UnsupportedOperationException("TODO");

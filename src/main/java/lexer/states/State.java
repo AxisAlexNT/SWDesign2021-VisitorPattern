@@ -6,10 +6,10 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-public interface State {
-    @NotNull State handle() throws WrongTokenException;
+public interface State<N extends Number> {
+    @NotNull State<N> handle() throws WrongTokenException;
 
-    @NotNull List<Token> getAccumulatedTokens();
+    @NotNull List<Token<N>> getAccumulatedTokens();
 
     boolean isTerminalState();
 }

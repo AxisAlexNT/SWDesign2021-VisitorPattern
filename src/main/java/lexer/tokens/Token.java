@@ -2,6 +2,6 @@ package lexer.tokens;
 
 import visitors.TokenVisitor;
 
-public interface Token {
-    void accept(final TokenVisitor visitor);
+public interface Token<N extends Number> {
+    void accept(final TokenVisitor<N> visitor);
 }

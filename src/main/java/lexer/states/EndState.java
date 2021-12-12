@@ -8,11 +8,11 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-public class EndState extends AbstractState {
+public class EndState<N extends Number> extends AbstractState<N> {
     @Getter
-    private final List<Token> accumulatedTokens;
+    private final List<Token<N>> accumulatedTokens;
 
-    public EndState(final @NotNull @NonNull Tokenizer tokenizer, final @NotNull @NonNull List<Token> accumulatedTokens) {
+    public EndState(final @NotNull @NonNull Tokenizer<N> tokenizer, final @NotNull @NonNull List<Token<N>> accumulatedTokens) {
         super(tokenizer, accumulatedTokens);
         this.accumulatedTokens = accumulatedTokens;
     }
@@ -23,7 +23,7 @@ public class EndState extends AbstractState {
     }
 
     @Override
-    public @NotNull State handle() {
+    public @NotNull State<N> handle() {
         return this;
     }
 

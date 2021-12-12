@@ -11,24 +11,24 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 
-public class ParserVisitor implements TokenVisitor {
-    private final Stack<Token> processingStack = new Stack<>();
+public class ParserVisitor<N extends Number> implements TokenVisitor<N> {
+    private final Stack<Token<N>> processingStack = new Stack<>();
 
-    private final List<Token> outputExpression = new ArrayList<>();
+    private final List<Token<N>> outputExpression = new ArrayList<>();
 
     @Override
-    public void visit(final @NotNull NumberToken token) {
+    public void visit(final @NotNull NumberToken<N> token) {
         outputExpression.add(token);
     }
 
     @Override
-    public void visit(final @NotNull Brace token) {
+    public void visit(final @NotNull Brace<N> token) {
         if (token instanceof Brace.LeftBrace) {
             processingStack.push(token);
             return;
         } else if (token instanceof Brace.RightBrace) {
             while (!processingStack.isEmpty()) {
-                final @NotNull Token stackToken = processingStack.pop();
+                final @NotNull Token<N> stackToken = processingStack.pop();
                 if (stackToken instanceof Brace.LeftBrace) {
                     return;
                 }
@@ -40,23 +40,16 @@ public class ParserVisitor implements TokenVisitor {
     }
 
     @Override
-    public void visit(final @NotNull Operation token) {
+    public void visit(final @NotNull Operation<N> token) {
         while (!processingStack.isEmpty()) {
-            final @NotNull Token topToken = processingStack.peek();
-            if ((token.isPrefix()) || !(topToken instanceof Operation)) {
+            final @NotNull Token<N> topToken = processingStack.peek();
+            if ((token.isPrefix()) || !(topToken instanceof final @NotNull Operation<N> topOp)) {
                 break;
             }
-            final @NotNull Operation topOp = (Operation) topToken;
-            if (
-                    (
-                            topOp.isPrefix()
-                    ) || (
-                            Operation.BY_PRIORITY_COMPARATOR.compare(topOp, token) < 0
-                    ) || (
-                            topOp.isLeftAssociative() && (Operation.BY_PRIORITY_COMPARATOR.compare(topOp, token) == 0)
-                    )
-
-            ) {
+            boolean higherPriority = topOp.isPrefix();
+            higherPriority |= (Operation.BY_PRIORITY_COMPARATOR.compare(topOp, token) < 0);
+            higherPriority |= (topOp.isLeftAssociative() && (Operation.BY_PRIORITY_COMPARATOR.compare(topOp, token) == 0));
+            if (higherPriority) {
                 outputExpression.add(processingStack.pop());
             } else {
                 break;
@@ -65,9 +58,9 @@ public class ParserVisitor implements TokenVisitor {
         processingStack.push(token);
     }
 
-    public List<Token> getOutputExpression() {
+    public List<Token<N>> getOutputExpression() {
         while (!processingStack.isEmpty()) {
-            final @NotNull Token topToken = processingStack.pop();
+            final @NotNull Token<N> topToken = processingStack.pop();
             if (topToken instanceof Operation) {
                 outputExpression.add(topToken);
             } else {

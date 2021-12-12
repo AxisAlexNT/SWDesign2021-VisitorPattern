@@ -10,20 +10,24 @@ import java.io.PushbackReader;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
+import java.util.function.Function;
 
-public class NumberState extends AbstractState {
+public class NumberState<N extends Number> extends AbstractState<N> {
     private final @NotNull Queue<Character> digitsAccumulator;
 
+    private final @NotNull Function<String, NumberToken<N>> numberTokenCreator;
 
-    public NumberState(final @NotNull @NonNull Tokenizer tokenizer, final @NotNull @NonNull List<Token> accumulatedTokens) {
+
+    public NumberState(final @NotNull @NonNull Tokenizer<N> tokenizer, final @NotNull @NonNull List<Token<N>> accumulatedTokens) {
         super(tokenizer, accumulatedTokens);
         this.digitsAccumulator = new LinkedList<>();
+        this.numberTokenCreator = tokenizer.getNumberTokenCreator();
     }
 
     @Override
-    public @NotNull State handle() {
+    public @NotNull State<N> handle() {
         final @NotNull @NonNull PushbackReader reader = tokenizer.getInputReader();
-        final @NotNull State newState;
+        final @NotNull State<N> newState;
 
         final int inputChar;
 
@@ -39,12 +43,12 @@ public class NumberState extends AbstractState {
                 if (!digitsAccumulator.isEmpty()) {
                     final @NotNull StringBuilder numberBuilder = new StringBuilder();
                     digitsAccumulator.forEach(numberBuilder::append);
-                    accumulatedTokens.add(NumberToken.valueOf(numberBuilder.toString()));
+                    accumulatedTokens.add(numberTokenCreator.apply(numberBuilder.toString()));
                 }
-                newState = new StartState(tokenizer, accumulatedTokens);
+                newState = new StartState<>(tokenizer, accumulatedTokens);
             }
         } catch (final Exception e) {
-            return new ErrorState(tokenizer, accumulatedTokens, e);
+            return new ErrorState<>(tokenizer, accumulatedTokens, e);
         }
 
         return newState;

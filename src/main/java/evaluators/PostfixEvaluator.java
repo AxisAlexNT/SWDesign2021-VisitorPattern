@@ -7,6 +7,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Stack;
 
-public interface PostfixEvaluator {
-    void evaluate(final @NotNull @NonNull Operation op, final @NotNull @NonNull Stack<@NotNull @NonNull NumberToken> args);
+public interface PostfixEvaluator<N extends Number> {
+    void evaluate(final @NotNull @NonNull Operation<N> op, final @NotNull @NonNull Stack<@NotNull @NonNull NumberToken<N>> args);
 }
